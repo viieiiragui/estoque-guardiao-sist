@@ -22,14 +22,18 @@ const ProtectedRoute = ({
   requiredRole?: 'visualizador' | 'operador' | 'admin' 
 }) => {
   const { isAuthenticated, checkPermission } = useAuth();
+  console.log('🚀 ~ isAuthenticated:', isAuthenticated);
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+  console.log('passei a verificação do isAuthenticated');
   
+  console.log(`🚀 ~ checkPermission ${requiredRole}:`, checkPermission(requiredRole));
   if (!checkPermission(requiredRole)) {
     return <Navigate to="/dashboard" replace />;
   }
+  console.log('passei a verificação do permissão!');
   
   return children;
 };

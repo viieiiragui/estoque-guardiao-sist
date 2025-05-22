@@ -1,11 +1,17 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -21,12 +27,22 @@ const Login = () => {
     }
   };
 
+  function handleEmailChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setEmail(e.target.value);
+  }
+
+  function handlePasswordChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setPassword(e.target.value);
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-custom-orange">
       <div className="max-w-md w-full">
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Controle de Estoque</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              Controle de Estoque
+            </CardTitle>
             <CardDescription className="text-center">
               Entre com suas credenciais para acessar o sistema
             </CardDescription>
@@ -39,7 +55,7 @@ const Login = () => {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleEmailChange}
                   placeholder="Digite seu email"
                   required
                 />
@@ -47,7 +63,10 @@ const Login = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Senha</Label>
-                  <a href="#" className="text-sm text-blue-600 hover:text-blue-800">
+                  <a
+                    href="#"
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
                     Esqueceu a senha?
                   </a>
                 </div>
@@ -55,7 +74,7 @@ const Login = () => {
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
                   placeholder="Digite sua senha"
                   required
                 />
@@ -70,17 +89,23 @@ const Login = () => {
               <p>Usuários disponíveis para teste:</p>
               <div className="grid grid-cols-3 gap-2 mt-2 text-xs">
                 <div className="border p-2 rounded-md">
-                  <p><strong>Admin</strong></p>
+                  <p>
+                    <strong>Admin</strong>
+                  </p>
                   <p>admin@exemplo.com</p>
                   <p>Senha: 123456</p>
                 </div>
                 <div className="border p-2 rounded-md">
-                  <p><strong>Operador</strong></p>
+                  <p>
+                    <strong>Operador</strong>
+                  </p>
                   <p>operador@exemplo.com</p>
                   <p>Senha: 123456</p>
                 </div>
                 <div className="border p-2 rounded-md">
-                  <p><strong>Visualizador</strong></p>
+                  <p>
+                    <strong>Visualizador</strong>
+                  </p>
                   <p>visualizador@exemplo.com</p>
                   <p>Senha: 123456</p>
                 </div>
