@@ -1,9 +1,9 @@
 
 import React, { ReactNode } from 'react';
-import { useAuth, UserRole } from '../contexts/AuthContext';
+import { useAuth, UserPermission } from '../contexts/AuthContext';
 
 interface PermissionGateProps {
-  requiredRole: UserRole;
+  requiredRole: UserPermission;
   children: ReactNode;
   fallback?: ReactNode;
 }

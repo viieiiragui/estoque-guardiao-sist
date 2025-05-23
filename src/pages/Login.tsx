@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -19,9 +18,9 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = login(email, password);
+    const success = await login(email, password);
     if (success) {
       navigate('/dashboard');
     }
@@ -84,34 +83,6 @@ const Login = () => {
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex flex-col">
-            <div className="text-sm text-center text-gray-500 mt-4">
-              <p>Usuários disponíveis para teste:</p>
-              <div className="grid grid-cols-3 gap-2 mt-2 text-xs">
-                <div className="border p-2 rounded-md">
-                  <p>
-                    <strong>Admin</strong>
-                  </p>
-                  <p>admin@exemplo.com</p>
-                  <p>Senha: 123456</p>
-                </div>
-                <div className="border p-2 rounded-md">
-                  <p>
-                    <strong>Operador</strong>
-                  </p>
-                  <p>operador@exemplo.com</p>
-                  <p>Senha: 123456</p>
-                </div>
-                <div className="border p-2 rounded-md">
-                  <p>
-                    <strong>Visualizador</strong>
-                  </p>
-                  <p>visualizador@exemplo.com</p>
-                  <p>Senha: 123456</p>
-                </div>
-              </div>
-            </div>
-          </CardFooter>
         </Card>
       </div>
     </div>

@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, UserRole } from './AuthContext';
+import { User, UserPermission } from './AuthContext';
 import { toast } from "sonner";
 
 interface UserContextType {

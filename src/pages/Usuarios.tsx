@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import { useUserManagement } from '../contexts/UserContext';
-import { User, UserRole } from '../contexts/AuthContext';
+import { User, UserPermission } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -21,7 +21,7 @@ const UserForm: React.FC<{
   const [formData, setFormData] = useState({
     name: initialData.name || '',
     email: initialData.email || '',
-    role: initialData.role || 'visualizador' as UserRole,
+    role: initialData.role || 'visualizador' as UserPermission,
     password: '',
   });
 
@@ -31,7 +31,7 @@ const UserForm: React.FC<{
   };
 
   const handleRoleChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, role: value as UserRole }));
+    setFormData((prev) => ({ ...prev, role: value as UserPermission }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -140,7 +140,7 @@ const Usuarios = () => {
     setIsEditUserOpen(true);
   };
 
-  const roleBadgeColors: Record<UserRole, string> = {
+  const roleBadgeColors: Record<UserPermission, string> = {
     admin: 'bg-purple-100 text-purple-800',
     operador: 'bg-blue-100 text-blue-800',
     visualizador: 'bg-green-100 text-green-800',

@@ -8,39 +8,22 @@ import React, {
 import { toast } from 'sonner';
 
 // Definindo os tipos de usuários
-export type UserRole = 'visualizador' | 'operador' | 'admin';
+export type UserPermission = 'visualizador' | 'operador' | 'admin';
 
 export interface User {
-  id: string;
-  name: string;
   email: string;
-  role: UserRole;
+  id: number;
+  name: string;
+  permission: UserPermission;
 }
 
 interface AuthContextType {
   currentUser: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  checkPermission: (requiredRole: UserRole) => boolean;
+  checkPermission: (requiredRole: UserPermission) => boolean;
 }
-
-// Mock de usuários para exemplo
-const mockUsers: User[] = [
-  { id: '1', name: 'Admin', email: 'admin@exemplo.com', role: 'admin' },
-  {
-    id: '2',
-    name: 'Operador',
-    email: 'operador@exemplo.com',
-    role: 'operador',
-  },
-  {
-    id: '3',
-    name: 'Visualizador',
-    email: 'visualizador@exemplo.com',
-    role: 'visualizador',
-  },
-];
 
 // Criando o contexto
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -75,21 +58,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, []);
 
-  // Login básico com mock de usuários
-  const login = (email: string, password: string): boolean => {
-    // Em uma aplicação real, aqui seria feita uma chamada para a API
-    const user = mockUsers.find((u) => u.email === email);
+  // Login
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const response = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
-    if (user && password === '123456') {
-      // Senha fixa para exemplo
-      setCurrentUser(user);
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      toast.success(`Bem-vindo, ${user.name}!`);
+      const data = await response.json();
+
+      setCurrentUser(data.user);
+      localStorage.setItem('currentUser', JSON.stringify(data.user));
+      toast.success(`Bem-vindo, ${data.user.name}!`);
       return true;
-    }
+    } catch (error) {
+      console.log('Erro login:', error);
 
-    toast.error('E-mail ou senha incorretos.');
-    return false;
+      toast.error('E-mail ou senha incorretos.');
+      return false;
+    }
   };
 
   // Logout
@@ -99,17 +93,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   // Verificar permissões baseado em hierarquia de papéis
-  const checkPermission = (requiredRole: UserRole): boolean => {
+  const checkPermission = (requiredRole: UserPermission): boolean => {
     if (!currentUser) return false;
 
-    const roleHierarchy: Record<UserRole, number> = {
+    const roleHierarchy: Record<UserPermission, number> = {
       visualizador: 1,
       operador: 2,
       admin: 3,
     };
 
-    const userRoleLevel = roleHierarchy[currentUser.role];
+    const userRoleLevel = roleHierarchy[currentUser.permission];
+    console.log('🚀 ~ userRoleLevel:', userRoleLevel);
     const requiredRoleLevel = roleHierarchy[requiredRole];
+    console.log('🚀 ~ requiredRoleLevel:', requiredRoleLevel);
 
     return userRoleLevel >= requiredRoleLevel;
   };
