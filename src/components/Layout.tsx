@@ -1,9 +1,9 @@
-
+import { Home, LogOut, Package, Search, Settings, Users } from 'lucide-react';
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
+
 import { Button } from '@/components/ui/button';
-import { Search, LogOut, Home, Package, Users, Settings } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser, logout, checkPermission } = useAuth();
@@ -25,7 +25,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <p className="text-sm text-slate-300">Bem vindo,</p>
             <p className="font-medium">{currentUser?.name}</p>
             <span className="text-xs px-2 py-1 bg-slate-700 rounded-full">
-              {currentUser?.role}
+              {currentUser?.permission}
             </span>
           </div>
 
@@ -82,8 +82,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </nav>
         </div>
         <div className="absolute bottom-0 left-0 p-4 w-64">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-700"
             onClick={() => logout()}
           >
@@ -95,24 +95,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       {/* Main content */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Top bar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center px-6 justify-between">
-          <div className="flex-1">
-            <div className="relative max-w-md">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Buscar..."
-                className="w-full pl-9 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-        </header>
-
         {/* Main content area */}
-        <div className="flex-1 overflow-auto p-6 bg-gray-50">
-          {children}
-        </div>
+        <div className="flex-1 overflow-auto p-6 bg-gray-50">{children}</div>
       </main>
     </div>
   );

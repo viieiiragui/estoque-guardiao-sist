@@ -1,129 +1,218 @@
+/* eslint-disable react-refresh/only-export-components */
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { toast } from 'sonner';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { toast } from "sonner";
+import { useAuth } from './AuthContext';
 
 export interface Product {
   id: string;
+  code: string;
   name: string;
-  description: string;
-  quantity: number;
-  price: number;
   category: string;
+  current_stock: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 interface InventoryContextType {
   products: Product[];
-  addProduct: (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  isLoading: boolean;
+  loadProducts: () => Promise<void>;
+  addProduct: (
+    product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>
+  ) => void;
   updateProduct: (id: string, updates: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   updateQuantity: (id: string, change: number) => void;
   getProduct: (id: string) => Product | undefined;
 }
 
-// Dados iniciais de exemplo
-const initialProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Notebook Dell Inspiron',
-    description: 'Notebook com processador i5, 8GB RAM, 256GB SSD',
-    quantity: 15,
-    price: 3500,
-    category: 'Eletrônicos',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    name: 'Smartphone Samsung Galaxy',
-    description: 'Smartphone com 128GB, 6GB RAM, câmera 48MP',
-    quantity: 25,
-    price: 1800,
-    category: 'Eletrônicos',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '3',
-    name: 'Monitor LG 24"',
-    description: 'Monitor LED Full HD',
-    quantity: 10,
-    price: 900,
-    category: 'Eletrônicos',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
-
-const InventoryContext = createContext<InventoryContextType | undefined>(undefined);
+const InventoryContext = createContext<InventoryContextType | undefined>(
+  undefined
+);
 
 export const useInventory = () => {
   const context = useContext(InventoryContext);
   if (!context) {
-    throw new Error('useInventory deve ser usado dentro de um InventoryProvider');
+    throw new Error(
+      'useInventory deve ser usado dentro de um InventoryProvider'
+    );
   }
   return context;
 };
 
-export const InventoryProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+export const InventoryProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const { isAuthenticated, token } = useAuth();
 
-  const addProduct = (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newProduct: Product = {
-      ...product,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-    setProducts((prev) => [...prev, newProduct]);
-    toast.success(`Produto ${product.name} adicionado com sucesso!`);
+  const loadProducts = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/product', {
+        // method: 'GET', // Por padrão, o método é GET
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      toast.error('Erro ao carregar produtos.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token]);
+
+  const addProduct = async (
+    product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>
+  ) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/product/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(product),
+      });
+
+      const data = await response.json();
+      setProducts((prevState) => [...prevState, data]);
+      toast.success(`Produto ${product.name} adicionado com sucesso!`);
+    } catch (error) {
+      toast.error('Erro ao cadastrar o produto.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const updateProduct = (id: string, updates: Partial<Product>) => {
-    setProducts((prev) =>
-      prev.map((product) => {
-        if (product.id === id) {
-          return { ...product, ...updates, updatedAt: new Date() };
-        }
-        return product;
-      })
-    );
-    toast.success("Produto atualizado com sucesso!");
+  const updateProduct = async (id: string, updates: Partial<Product>) => {
+    try {
+      await fetch(`http://localhost:5000/api/product/update/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updates),
+      });
+
+      await loadProducts();
+      toast.success('Produto atualizado com sucesso!');
+    } catch (error) {
+      toast.error('Erro ao atualizar o produto.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const deleteProduct = (id: string) => {
-    const productName = products.find(p => p.id === id)?.name;
-    setProducts((prev) => prev.filter((product) => product.id !== id));
-    toast.success(`Produto ${productName || ''} removido com sucesso!`);
+  const deleteProduct = async (id: string) => {
+    try {
+      await fetch(`http://localhost:5000/api/product/delete/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const productName = products.find((p) => p.id === id)?.name;
+      toast.success(`Produto ${productName || ''} removido com sucesso!`);
+
+      setProducts((prevState) =>
+        prevState.filter((product) => product.id !== id)
+      );
+    } catch (error) {
+      toast.error('Erro ao remover o produto.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const updateQuantity = (id: string, change: number) => {
-    setProducts((prev) =>
-      prev.map((product) => {
-        if (product.id === id) {
-          const newQuantity = product.quantity + change;
-          
-          if (newQuantity < 0) {
-            toast.error("Quantidade não pode ser menor que zero!");
-            return product;
-          }
-          
-          toast.success(`Quantidade atualizada: ${product.name} ${change > 0 ? '+' : ''}${change}`);
-          return { ...product, quantity: newQuantity, updatedAt: new Date() };
-        }
-        return product;
-      })
-    );
+  const entryTransaction = async (id: string, quantity: number) => {
+    try {
+      await fetch('http://localhost:5000/api/transactions/entry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          product_id: id,
+          quantity,
+        }),
+      });
+
+      await loadProducts();
+      toast.success('Entrada registrada com sucesso!');
+    } catch (error) {
+      toast.error(
+        'Não foi possível registrar a entrada do produto no estoque.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const exitTransaction = async (id: string, quantity: number) => {
+    try {
+      await fetch('http://localhost:5000/api/transactions/exit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          product_id: id,
+          quantity,
+        }),
+      });
+
+      await loadProducts();
+      toast.success('Saída processada com sucesso!');
+    } catch (error) {
+      toast.error('Falha ao processar a saída do produto no estoque.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateQuantity = async (id: string, change: number) => {
+    if (change > 0) {
+      await entryTransaction(id, change);
+    } else if (change < 0) {
+      await exitTransaction(id, Math.abs(change));
+    }
+
+    await loadProducts();
   };
 
   const getProduct = (id: string) => {
     return products.find((product) => product.id === id);
   };
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadProducts();
+    }
+  }, [isAuthenticated, loadProducts]);
+
   const value = {
     products,
+    isLoading,
+    loadProducts,
     addProduct,
     updateProduct,
     deleteProduct,
@@ -131,5 +220,9 @@ export const InventoryProvider: React.FC<{ children: ReactNode }> = ({ children 
     getProduct,
   };
 
-  return <InventoryContext.Provider value={value}>{children}</InventoryContext.Provider>;
+  return (
+    <InventoryContext.Provider value={value}>
+      {children}
+    </InventoryContext.Provider>
+  );
 };

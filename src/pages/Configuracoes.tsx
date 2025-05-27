@@ -29,7 +29,7 @@ const Configuracoes = () => {
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-500">Função</h3>
-                <p className="capitalize">{currentUser?.role}</p>
+                <p className="capitalize">{currentUser?.permission}</p>
               </div>
             </CardContent>
           </Card>

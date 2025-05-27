@@ -1,14 +1,15 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, {
   createContext,
-  useContext,
-  useState,
   ReactNode,
+  useContext,
   useEffect,
+  useState,
 } from 'react';
 import { toast } from 'sonner';
 
 // Definindo os tipos de usuários
-export type UserPermission = 'visualizador' | 'operador' | 'admin';
+export type UserPermission = 'viewer' | 'operator' | 'admin';
 
 export interface User {
   email: string;
@@ -19,6 +20,7 @@ export interface User {
 
 interface AuthContextType {
   currentUser: User | null;
+  token: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
@@ -49,12 +51,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
     return null;
   });
+  const [token, setToken] = useState<string | null>(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      return storedToken;
+    }
+
+    return null;
+  });
 
   // Recuperar usuário do localStorage ao carregar a página
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
       setCurrentUser(JSON.parse(storedUser));
+    }
+
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken);
     }
   }, []);
 
@@ -75,12 +90,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       const data = await response.json();
 
       setCurrentUser(data.user);
+      setToken(data.access_token);
       localStorage.setItem('currentUser', JSON.stringify(data.user));
+      localStorage.setItem('token', data.access_token);
       toast.success(`Bem-vindo, ${data.user.name}!`);
       return true;
     } catch (error) {
-      console.log('Erro login:', error);
-
       toast.error('E-mail ou senha incorretos.');
       return false;
     }
@@ -89,7 +104,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   // Logout
   const logout = () => {
     setCurrentUser(null);
+    setToken(null);
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('token');
   };
 
   // Verificar permissões baseado em hierarquia de papéis
@@ -97,21 +114,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     if (!currentUser) return false;
 
     const roleHierarchy: Record<UserPermission, number> = {
-      visualizador: 1,
-      operador: 2,
+      viewer: 1,
+      operator: 2,
       admin: 3,
     };
 
     const userRoleLevel = roleHierarchy[currentUser.permission];
-    console.log('🚀 ~ userRoleLevel:', userRoleLevel);
     const requiredRoleLevel = roleHierarchy[requiredRole];
-    console.log('🚀 ~ requiredRoleLevel:', requiredRoleLevel);
 
     return userRoleLevel >= requiredRoleLevel;
   };
 
   const value = {
     currentUser,
+    token,
     isAuthenticated: !!currentUser,
     login,
     logout,

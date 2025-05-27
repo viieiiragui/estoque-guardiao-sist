@@ -16,10 +16,10 @@ import NotFound from "./pages/NotFound";
 // Componente para proteger rotas
 const ProtectedRoute = ({ 
   children, 
-  requiredRole = 'visualizador' 
+  requiredRole = 'viewer' 
 }: { 
   children: JSX.Element, 
-  requiredRole?: 'visualizador' | 'operador' | 'admin' 
+  requiredRole?: 'viewer' | 'operator' | 'admin' 
 }) => {
   const { isAuthenticated, checkPermission } = useAuth();
   
