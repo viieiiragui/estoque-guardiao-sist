@@ -1,73 +1,116 @@
-# Welcome to your Lovable project
+# StockFlow - Inventory Management System
 
-## Project info
+A modern, web-based inventory management system built with React and TypeScript. This application provides comprehensive stock control features including product management, quantity tracking, user authentication, and role-based permissions.
 
-**URL**: https://lovable.dev/projects/c4dd8f48-a14a-449e-bc53-debaa9681a26
+## Features
 
-## How can I edit this code?
+- **Product Management**: Add, edit, delete, and search products with detailed information
+- **Stock Control**: Track current stock levels with entry and exit transactions
+- **User Authentication**: Secure login system with role-based access control
+- **Role Permissions**: Different access levels (Admin, Operator) with specific capabilities
+- **Real-time Updates**: Live inventory updates with toast notifications
+- **Responsive Design**: Modern UI built with shadcn/ui and Tailwind CSS
+- **Transaction History**: Track all stock movements and changes
 
-There are several ways of editing your application.
+## Technologies Used
 
-**Use Lovable**
+- **Frontend**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **UI Framework**: shadcn/ui components
+- **Styling**: Tailwind CSS
+- **HTTP Client**: Fetch API communication
+- **State Management**: React Context API
+- **Icons**: Lucide React
+- **Notifications**: Sonner for toast messages
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c4dd8f48-a14a-449e-bc53-debaa9681a26) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js (v16 or higher)
+- npm or yarn package manager
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd stockflow
+```
 
-Follow these steps:
+2. Install dependencies:
+```bash
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. Set up environment variables:
+```bash
+cp .env.example .env
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+4. Update the `.env` file with your API configuration:
+```bash
+VITE_API_BASE_URL=http://localhost:5000/api
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+5. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Available Scripts
 
-**Use GitHub Codespaces**
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run build:dev` - Build for development
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Project Structure
 
-## What technologies are used for this project?
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # shadcn/ui components
+│   ├── Layout.tsx      # Main layout wrapper
+│   └── PermissionGate.tsx # Role-based access control
+├── contexts/           # React Context providers
+│   ├── AuthContext.tsx # Authentication state
+│   ├── InventoryContext.tsx # Product and stock management
+│   └── UserContext.tsx # User management
+├── pages/              # Application pages
+│   ├── Dashboard.tsx   # Main dashboard
+│   ├── Login.tsx       # Authentication page
+│   ├── Produtos/       # Product management pages
+│   └── Usuarios.tsx    # User management
+├── services/           # API services
+├── types/              # TypeScript type definitions
+└── utils/              # Utility functions
+```
 
-This project is built with:
+## API Integration
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+This frontend application requires a backend API server. Make sure to:
 
-## How can I deploy this project?
+1. Set up your backend API server
+2. Configure the `VITE_API_BASE_URL` in your `.env` file to point to your API endpoint
+3. Ensure CORS is properly configured on your backend to allow requests from the frontend
 
-Simply open [Lovable](https://lovable.dev/projects/c4dd8f48-a14a-449e-bc53-debaa9681a26) and click on Share -> Publish.
+## User Roles
 
-## Can I connect a custom domain to my Lovable project?
+- **Admin**: Full access to all features including user management and system settings
+- **Operator**: Can manage products and stock but has limited access to administrative features
 
-Yes, you can!
+## Contributing
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -am 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Create a Pull Request
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## License
+
+This project is licensed under the MIT License.
