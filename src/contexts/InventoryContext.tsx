@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { toast } from 'sonner';
 
+import { httpClient } from '@/services/httpClient';
 import { useAuth } from './AuthContext';
 
 export interface Product {
@@ -51,44 +52,27 @@ export const useInventory = () => {
 export const InventoryProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadProducts = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/product', {
-        // method: 'GET', // Por padrão, o método é GET
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
+      const { data } = await httpClient.get<Product[]>('/product');
       setProducts(data);
     } catch (error) {
       toast.error('Erro ao carregar produtos.');
     } finally {
       setIsLoading(false);
     }
-  }, [token]);
+  }, []);
 
   const addProduct = async (
     product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>
   ) => {
     try {
-      const response = await fetch('http://localhost:5000/api/product/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(product),
-      });
-
-      const data = await response.json();
+      const { data } = await httpClient.post<Product>('/product/create', product);
       setProducts((prevState) => [...prevState, data]);
       toast.success(`Produto ${product.name} adicionado com sucesso!`);
     } catch (error) {
@@ -100,15 +84,7 @@ export const InventoryProvider: React.FC<{ children: ReactNode }> = ({
 
   const updateProduct = async (id: string, updates: Partial<Product>) => {
     try {
-      await fetch(`http://localhost:5000/api/product/update/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(updates),
-      });
-
+      await httpClient.put(`/product/update/${id}`, updates);
       await loadProducts();
       toast.success('Produto atualizado com sucesso!');
     } catch (error) {
@@ -120,13 +96,7 @@ export const InventoryProvider: React.FC<{ children: ReactNode }> = ({
 
   const deleteProduct = async (id: string) => {
     try {
-      await fetch(`http://localhost:5000/api/product/delete/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await httpClient.delete(`/product/delete/${id}`);
 
       const productName = products.find((p) => p.id === id)?.name;
       toast.success(`Produto ${productName || ''} removido com sucesso!`);
@@ -143,16 +113,9 @@ export const InventoryProvider: React.FC<{ children: ReactNode }> = ({
 
   const entryTransaction = async (id: string, quantity: number) => {
     try {
-      await fetch('http://localhost:5000/api/transactions/entry', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          product_id: id,
-          quantity,
-        }),
+      await httpClient.post('/transactions/entry', {
+        product_id: id,
+        quantity,
       });
 
       await loadProducts();
@@ -168,16 +131,9 @@ export const InventoryProvider: React.FC<{ children: ReactNode }> = ({
 
   const exitTransaction = async (id: string, quantity: number) => {
     try {
-      await fetch('http://localhost:5000/api/transactions/exit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          product_id: id,
-          quantity,
-        }),
+      await httpClient.post('/transactions/exit', {
+        product_id: id,
+        quantity,
       });
 
       await loadProducts();

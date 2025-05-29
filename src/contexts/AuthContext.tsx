@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
+import { httpClient } from '@/services/httpClient';
 import React, {
   createContext,
   ReactNode,
@@ -20,7 +21,6 @@ export interface User {
 
 interface AuthContextType {
   currentUser: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
@@ -51,46 +51,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
     return null;
   });
-  const [token, setToken] = useState<string | null>(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      return storedToken;
-    }
-
-    return null;
-  });
-
-  // Recuperar usuário do localStorage ao carregar a página
-  useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    }
-
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-    }
-  }, []);
 
   // Login
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+      const { data } = await httpClient.post<{
+        user: User;
+        access_token: string;
+      }>('/login', {
+        email,
+        password,
       });
 
-      const data = await response.json();
-
       setCurrentUser(data.user);
-      setToken(data.access_token);
       localStorage.setItem('currentUser', JSON.stringify(data.user));
       localStorage.setItem('token', data.access_token);
       toast.success(`Bem-vindo, ${data.user.name}!`);
@@ -104,7 +77,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   // Logout
   const logout = () => {
     setCurrentUser(null);
-    setToken(null);
     localStorage.removeItem('currentUser');
     localStorage.removeItem('token');
   };
@@ -125,9 +97,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     return userRoleLevel >= requiredRoleLevel;
   };
 
+  // Recuperar usuário do localStorage ao carregar a página
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  // Adicionar listener para logout global
+  useEffect(() => {
+    const handleLogout = () => {
+      logout();
+      toast.error('Seu token expirou, você foi desconectado.');
+    };
+
+    window.addEventListener('auth:logout', handleLogout);
+    return () => window.removeEventListener('auth:logout', handleLogout);
+  }, []);
+
   const value = {
     currentUser,
-    token,
     isAuthenticated: !!currentUser,
     login,
     logout,
