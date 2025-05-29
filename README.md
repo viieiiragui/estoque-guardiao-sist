@@ -35,7 +35,7 @@ A modern, web-based inventory management system built with React and TypeScript.
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd stockflow
+cd stock_flow_frontend
 ```
 
 2. Install dependencies:
